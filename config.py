@@ -213,7 +213,7 @@ for i in groups:
 
 #CHANGE WORKSPACES
         Key([mod], i.name, lazy.group[i.name].toscreen()),
-        Key([mod], "Tab", lazy.screen.next_group()),
+        Key([mod], "Tab", lazy.spawn("rofi -show window -lines 5 -width 100 -location 2")),
         Key([mod, "shift" ], "Tab", lazy.screen.prev_group()),
         Key(["mod1"], "Tab", lazy.screen.next_group()),
         Key(["mod1", "shift"], "Tab", lazy.screen.prev_group()),
@@ -271,6 +271,9 @@ def pacman_update():
 
 def arco_menu():
     subprocess.call(home + "/Programs/xmenu/xmenu.sh")
+
+def rofi_windows():
+    qtile.cmd_spawn("rofi -show window -lines 5 -width 100 -location 2")
 
 # WIDGETS FOR THE BAR
 
@@ -343,29 +346,31 @@ def init_widgets_list():
                 background = colors[1],
                 scale = 0.7
                 ),
-            # widget.Image(
-                # filename = home + '/Pictures/topleft.png',
-                # margin_y = 0,
-                # margin_x = 0,
-                # background = "#333333",
-                # ),
-            widget.Sep(
-                linewidth = 1,
-                padding = 10,
-                foreground = colors[2],
-                background = colors[1]
+            widget.Image(
+                filename = home + '/Pictures/topleft.png',
+                margin_y = 0,
+                margin_x = 0,
+                background = "#282828",
                 ),
+            # widget.Sep(
+                # linewidth = 1,
+                # padding = 10,
+                # foreground = colors[2],
+                # background = colors[1]
+                # ),
             widget.WindowName(font="Noto Sans",
                 foreground = colors[2],
-                background = None, #colors[5],
+                padding = 50,
+                background = "#282828", #colors[11],
                 max_chars = 90,
+                mouse_callbacks = {'Button1': rofi_windows},
                 ),
-            # widget.Image(
-                # filename = home + '/Pictures/topright.png',
-                # margin_y = 0,
-                # margin_x = 0,
-                # background = "#333333",
-                # ),
+            widget.Image(
+                filename = home + '/Pictures/topright.png',
+                margin_y = 0,
+                margin_x = 0,
+                background = "#282828",
+                ),
             # widget.Sep(
                 # linewidth = 1,
                 # padding = 10,
