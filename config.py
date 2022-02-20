@@ -41,6 +41,8 @@ mod1 = "alt"
 mod2 = "control"
 home = os.path.expanduser('~')
 
+myterminal = "alacritty"
+
 
 @lazy.function
 def window_to_prev_group(qtile):
@@ -163,16 +165,18 @@ keys = [
     # WEB BROWSER
     Key([mod], "b", lazy.spawn("brave")),
     Key([mod, "shift"], "b", lazy.spawn("brave --incognito")),
-    # TERMINAL (termite)
-    Key([mod], "Return", lazy.spawn("termite")),
+    # TERMINAL 
+    Key([mod], "Return", lazy.spawn(myterminal)),
     # FILE MANAGERS
     Key([mod], "y", lazy.spawn("urxvt -e ranger")),
     Key([mod, "shift"], "y", lazy.spawn("nautilus")),
     # ROFI LAUNCHER
-    Key([mod], "r", lazy.spawn("rofi -modi combi -combi-modi window,drun -show combi -icon-theme Sardi-Arc -show-icons")),
+    # Key([mod], "r", lazy.spawn("rofi -modi combi -combi-modi window,drun -show combi -icon-theme Sardi-Arc -show-icons")),
+    Key([mod], "r", lazy.spawn("rofi -modi combi -combi-modi window,drun -show combi")),
+    # Key([mod], "r", lazy.spawn("rofi -show drun -config ~/.config/rofi/blurry.rasi")),
     # SLEEP TIMER
     Key([mod], "XF86PowerOff", lazy.spawn("/home/henrik/Dev/fish/sleep-timer.sh")),
-    # POWE MODE SELECTOR
+    # POWER MODE SELECTOR
     Key([mod, "shift"], "p", lazy.spawn("fish -c pmenu")),
 
 # FUNCTION KEYS
@@ -186,6 +190,15 @@ keys = [
     # LOGOUT MENU (arcolinux-logout)
     Key([], "XF86PowerOff", lazy.spawn("arcolinux-logout")),
 
+    # Window switcher
+    Key([mod], "Tab", lazy.spawn("rofi -show window -width 70 -location 2 -no-fixed-num-lines")),
+    # Key([mod], "Tab", lazy.spawn("rofi -show window -config ~/.config/rofi/blurry.rasi")),
+    
+    # change variety wallpaper
+    Key([mod], "n", lazy.spawn("variety -n")),
+    Key([mod], "p", lazy.spawn("variety -p")),
+    Key([mod], "s", lazy.spawn("variety -f")),
+
     ]
 
 groups = []
@@ -193,10 +206,14 @@ groups = []
 # FOR QWERTY KEYBOARDS
 group_names = ["1", "2", "3", "4", "5", "6", "7", "8", "9",]
 group_labels = ["1","2","3","4","5","6","7","8","9","0",]
+group_layouts = ["monadtall", "monadtall", "monadtall", "monadtall", "monadtall", "monadtall", "monadtall", "monadtall", "max",]
+
+# group_labels = ["λ", "π", "τ", "ω", "ν"]
+# group_names = [str(i+1) for i in range(len(group_labels))]
+# group_layouts = ["monadtall" for i in range(len(group_labels))]
 #group_labels = ["", "", "", "", "", "", "", "", "", "",]
 #group_labels = ["Web", "Edit/chat", "Image", "Gimp", "Meld", "Video", "Vb", "Files", "Mail", "Music",]
 
-group_layouts = ["monadtall", "monadtall", "monadtall", "monadtall", "monadtall", "monadtall", "monadtall", "monadtall", "monadtall",]
 #group_layouts = ["monadtall", "matrix", "monadtall", "bsp", "monadtall", "matrix", "monadtall", "bsp", "monadtall", "monadtall",]
 #group_layouts = ["monadtall", "max", "monadwide", "matrix",]
 
@@ -213,7 +230,6 @@ for i in groups:
 
 #CHANGE WORKSPACES
         Key([mod], i.name, lazy.group[i.name].toscreen()),
-        Key([mod], "Tab", lazy.spawn("rofi -show window -lines 5 -width 100 -location 2")),
         Key([mod, "shift" ], "Tab", lazy.screen.prev_group()),
         Key(["mod1"], "Tab", lazy.screen.next_group()),
         Key(["mod1", "shift"], "Tab", lazy.screen.prev_group()),
@@ -228,7 +244,7 @@ for i in groups:
 def init_layout_theme():
     return {"margin":8,
             "border_width":2,
-            "border_focus": "#3384d0", #"#5e81ac",
+            "border_focus": "#02dfe3", #"#3384d0", #"#5e81ac",
             "border_normal": "#000000" #"#4c566a"
             }
 
@@ -241,7 +257,7 @@ layouts = [
     #layout.Matrix(**layout_theme),
     #layout.MonadWide(**layout_theme),
     #layout.Bsp(**layout_theme),
-    #layout.Floating(**layout_theme),
+    layout.Floating(**layout_theme),
     #layout.RatioTile(**layout_theme),
 ]
 
@@ -267,13 +283,13 @@ colors += [["#689d69", "#689d69"], ["#458587", "#458587"], ["#d79922", "#d79922"
     
 # WIDGET FUNCTIONS
 def pacman_update():
-    qtile.cmd_spawn("termite -e 'sudo pacman -Syu'")
+    qtile.cmd_spawn("alacritty -e 'sudo pacman -Syu'")
 
 def arco_menu():
     subprocess.call(home + "/Programs/xmenu/xmenu.sh")
 
 def rofi_windows():
-    qtile.cmd_spawn("rofi -show window -lines 5 -width 100 -location 2")
+    qtile.cmd_spawn("rofi -show window -no-fixed-num-lines -width 70 -location 2")
 
 # WIDGETS FOR THE BAR
 
@@ -284,28 +300,30 @@ def init_widgets_defaults():
                 background=colors[1])
 
 widget_defaults = init_widgets_defaults()
+widget_spacing = 15
 
 def init_widgets_list():
     prompt = "{0}@{1}: ".format(os.environ["USER"], socket.gethostname())
     widgets_list = [
-            widget.Sep(
-                linewidth = 0,
-                padding = 12,
-                foreground = colors[2],
-                background = colors[1]
-                ),
+            # widget.Sep(
+                # linewidth = 0,
+                # padding = 12,
+                # foreground = colors[2],
+                # background = colors[1]
+                # ),
             widget.Image(
                 filename = '~/.config/qtile/icons/arco2.png',
                 margin_y = 2,
                 margin_x = 0,
                 mouse_callbacks = {'Button1': arco_menu},
                 ),
-            widget.Sep(
-                linewidth = 1,
-                padding = 10,
-                foreground = colors[2],
-                background = colors[1]
-                ),
+            widget.Spacer(length = widget_spacing),
+            # widget.Sep(
+                # linewidth = 1,
+                # padding = 10,
+                # foreground = colors[2],
+                # background = colors[1]
+                # ),
             widget.GroupBox(
                 font="FontAwesome",
                 fontsize = 18,
@@ -323,35 +341,38 @@ def init_widgets_list():
                 foreground = colors[2],
                 background = "#000000"
                 ),
-            widget.Sep(
-                linewidth = 1,
-                padding = 10,
-                foreground = colors[2],
-                background = colors[1]
-                ),
-            widget.Systray(
-                background=colors[1],
-                icon_size=22,
-                padding = 4
-                ),
-            widget.Sep(
-                linewidth = 1,
-                padding = 10,
-                foreground = colors[2],
-                background = colors[1]
-                ),
+            widget.Spacer(length = widget_spacing),
+            # widget.Sep(
+                # linewidth = 1,
+                # padding = 10,
+                # foreground = colors[2],
+                # background = colors[1]
+                # ),
             widget.CurrentLayoutIcon(
                 font = "Noto Sans Bold",
                 foreground = colors[5],
                 background = colors[1],
                 scale = 0.7
                 ),
-            widget.Image(
-                filename = home + '/Pictures/topleft.png',
-                margin_y = 0,
-                margin_x = 0,
-                background = "#282828",
+            widget.Spacer(length = widget_spacing),
+            widget.Systray(
+                background=colors[1],
+                icon_size=22,
+                padding = 8
                 ),
+            widget.Spacer(length = widget_spacing),
+            # widget.Sep(
+                # linewidth = 1,
+                # padding = 10,
+                # foreground = colors[2],
+                # background = colors[1]
+                # ),
+            # widget.Image(
+                # filename = home + '/Pictures/topleft.png',
+                # margin_y = 0,
+                # margin_x = 0,
+                # background = "#282828",
+                # ),
             # widget.Sep(
                 # linewidth = 1,
                 # padding = 10,
@@ -361,16 +382,17 @@ def init_widgets_list():
             widget.WindowName(font="Noto Sans",
                 foreground = colors[2],
                 padding = 50,
-                background = "#282828", #colors[11],
+                # background = "#282828", #colors[11],
                 max_chars = 90,
                 mouse_callbacks = {'Button1': rofi_windows},
                 ),
-            widget.Image(
-                filename = home + '/Pictures/topright.png',
-                margin_y = 0,
-                margin_x = 0,
-                background = "#282828",
-                ),
+            widget.Spacer(length = widget_spacing),
+            # widget.Image(
+                # filename = home + '/Pictures/topright.png',
+                # margin_y = 0,
+                # margin_x = 0,
+                # background = "#282828",
+                # ),
             # widget.Sep(
                 # linewidth = 1,
                 # padding = 10,
@@ -388,12 +410,13 @@ def init_widgets_list():
                 scale = 0.4,
                 mouse_callbacks = {'Button1': pacman_update},
                 ),
-            widget.Sep(
-                linewidth = 1,
-                padding = 10,
-                foreground = colors[2],
-                background = colors[1]
-                ),
+            widget.Spacer(length = widget_spacing),
+            # widget.Sep(
+                # linewidth = 1,
+                # padding = 10,
+                # foreground = colors[2],
+                # background = colors[1]
+                # ),
             # widget.TextBox(
                 # font="FontAwesome",
                 # text="  ", # temp icon
@@ -449,13 +472,14 @@ def init_widgets_list():
                 charge_char = "",
                 #format = '{char} {percent:2.0%} {hour:d}:{min:02d} {watt:.2f} W'
                 format = '{percent:2.0%} {char}'
-	            ),
-            widget.Sep(
-                linewidth = 1,
-                padding = 10,
-                foreground = colors[2],
-                background = colors[1]
-                ),
+	        ),
+            widget.Spacer(length = widget_spacing),
+            # widget.Sep(
+                # linewidth = 1,
+                # padding = 10,
+                # foreground = colors[2],
+                # background = colors[1]
+                # ),
             widget.TextBox(
                 font="FontAwesome",
                 text="  ", # Calendar icon
@@ -468,12 +492,12 @@ def init_widgets_list():
                 background = colors[1],
                 format="%d.%m.%Y  %H:%M  "
                 ),
-            widget.Sep(
-                linewidth = 0,
-                padding = 4,
-                foreground = colors[2],
-                background = colors[1]
-                ),
+            # widget.Sep(
+                # linewidth = 0,
+                # padding = 4,
+                # foreground = colors[2],
+                # background = colors[1]
+                # ),
                 ]
     return widgets_list
 
@@ -527,41 +551,42 @@ def set_floating(window):
             or window.window.get_wm_type() in floating_types):
         window.floating = True
 
-floating_types = ["notification", "toolbar", "splash", "dialog"]
+###floating_types = ["notification", "toolbar", "splash", "dialog"]
 
 
 follow_mouse_focus = False
-bring_front_click = False
+bring_front_click = True
 cursor_warp = False
-floating_layout = layout.Floating(float_rules=[
-    {'wmclass': 'Arcolinux-welcome-app.py'},
-    {'wmclass': 'Arcolinux-tweak-tool.py'},
-    {'wmclass': 'Arcolinux-calamares-tool.py'},
-    {'wmclass': 'confirm'},
-    {'wmclass': 'dialog'},
-    {'wmclass': 'download'},
-    {'wmclass': 'error'},
-    {'wmclass': 'file_progress'},
-    {'wmclass': 'notification'},
-    {'wmclass': 'splash'},
-    {'wmclass': 'toolbar'},
-    {'wmclass': 'confirmreset'},
-    {'wmclass': 'makebranch'},
-    {'wmclass': 'maketag'},
-    {'wmclass': 'Arandr'},
-    {'wmclass': 'feh'},
-    {'wmclass': 'Galculator'},
-    {'wmclass': 'arcolinux-logout'},
-    {'wmclass': 'xfce4-terminal'},
-    {'wname': 'branchdialog'},
-    {'wname': 'Open File'},
-    {'wname': 'pinentry'},
-    {'wmclass': 'ssh-askpass'},
-    {'wname': 'Picture in picture'},
+###floating_layout = layout.Floating(float_rules=[
+    ###{'wmclass': 'Arcolinux-welcome-app.py'},
+    ###{'wmclass': 'Arcolinux-tweak-tool.py'},
+    ###{'wmclass': 'Arcolinux-calamares-tool.py'},
+    ###{'wmclass': 'confirm'},
+    ###{'wmclass': 'dialog'},
+    ###{'wmclass': 'download'},
+    ###{'wmclass': 'error'},
+    ###{'wmclass': 'file_progress'},
+    ###{'wmclass': 'notification'},
+    ###{'wmclass': 'splash'},
+    ###{'wmclass': 'toolbar'},
+    ###{'wmclass': 'confirmreset'},
+    ###{'wmclass': 'makebranch'},
+    ###{'wmclass': 'maketag'},
+    ###{'wmclass': 'Arandr'},
+    ###{'wmclass': 'feh'},
+    ###{'wmclass': 'Galculator'},
+    ###{'wmclass': 'arcolinux-logout'},
+    ###{'wmclass': 'xfce4-terminal'},
+    ###{'wname': 'branchdialog'},
+    ###{'wname': 'Open File'},
+    ###{'wname': 'pinentry'},
+    ###{'wmclass': 'ssh-askpass'},
+    ###{'wname': 'Picture in picture'},
 
-],  fullscreen_border_width = 0, border_width = 0)
+###],  fullscreen_border_width = 0, border_width = 0)
 auto_fullscreen = True
 
 focus_on_window_activation = "focus" # or smart
+focus_on_window_activation = "smart" # or smart
 
 wmname = "qtile"

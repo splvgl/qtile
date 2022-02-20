@@ -15,11 +15,18 @@ run blueberry-tray
 run volumeicon
 
 # compositor and wallpaper
-run picom -b
+run picom -b --experimental-backends
 run nitrogen --restore
+# run variety
+
+# setting cursor speed for touchpad
+run xinput set-prop 13 326 0.35
 
 # enabling natural scrolling for touchpad
 run xinput set-prop 13 317 1
+
+# hide mouse cursor when not in use
+run unclutter
 
 # automatically set the screen color temperature at night
 time=$(date +%H)
@@ -31,8 +38,8 @@ run libinput-gestures-setup restart
 # notifications using dunst
 run dunst
 
-# hide mouse cursor when not in use
-run unclutter
-
 # policykit
 run lxsession -e QTILE
+
+# latte-dock (configured in Plasma)
+run latte-dock
